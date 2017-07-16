@@ -1,1 +1,1 @@
-python start_node.py 3 nodes.txt
+python ../Nodes/start_node.py 3 nodes.txt

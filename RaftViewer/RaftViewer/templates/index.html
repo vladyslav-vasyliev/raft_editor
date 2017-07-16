@@ -1,33 +1,42 @@
-{% extends "layout.html" %}
-
-{% block content %}
-
-<div class="jumbotron">
-    <h1>Flask</h1>
-    <p class="lead">Flask is a free web framework for building great Web sites and Web applications using HTML, CSS and JavaScript.</p>
-    <p><a href="http://flask.pocoo.org/" class="btn btn-primary btn-large">Learn more &raquo;</a></p>
-</div>
-
-<div class="row">
-    <div class="col-md-4">
-        <h2>Getting started</h2>
-        <p>
-            Flask gives you a powerful, patterns-based way to build dynamic websites that
-            enables a clean separation of concerns and gives you full control over markup
-            for enjoyable, agile development.
-        </p>
-        <p><a class="btn btn-default" href="http://flask.pocoo.org/docs/">Learn more &raquo;</a></p>
-    </div>
-    <div class="col-md-4">
-        <h2>Get more libraries</h2>
-        <p>The Python Package Index is a repository of software for the Python programming language.</p>
-        <p><a class="btn btn-default" href="https://pypi.python.org/pypi">Learn more &raquo;</a></p>
-    </div>
-    <div class="col-md-4">
-        <h2>Microsoft Azure</h2>
-        <p>You can easily publish to Microsoft Azure using Python Tools for Visual Studio. Find out how you can host your application using a free trial today.</p>
-        <p><a class="btn btn-default" href="http://azure.microsoft.com">Learn more &raquo;</a></p>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{title}}</title>
+    <link rel="stylesheet" type="text/css" href="/static/content/bootstrap.min.css"/>
+    <link rel="stylesheet" type="text/css" href="/static/content/site.css"/>
+    <script src="/static/scripts/modernizr-2.6.2.js"></script>
+</head>
+<body>
+<div class="container">
+    <div class="row">
+        <form class="col-lg-12 col-md-12">
+            <div class="form-group">
+                <textarea id="data" class="form-control" rows="5">{{content}}</textarea>
+            </div>
+            <button type="button" onclick="readData()" class="btn">Update</button>
+            <button type="button" onclick="writeData()" class="btn">Submit</button>
+        </form>
     </div>
 </div>
-
-{% endblock %}
+<script src="/static/scripts/jquery-1.10.2.js"></script>
+<script src="/static/scripts/bootstrap.js"></script>
+<script src="/static/scripts/respond.js"></script>
+<script>
+    function readData() {
+        $.get('/read_data', function(data) {
+            $('#data').val(data);
+        });
+    }
+    function writeData() {
+        var textareaData = $('#data').val();
+        $.ajax({
+            type: 'POST',
+            url: '/write_data',
+            data: textareaData,
+            success: function () { readData(); }
+        });
+    }
+</script>
+</body>
+</html>
