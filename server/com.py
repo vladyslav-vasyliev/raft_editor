@@ -12,16 +12,12 @@ import sys
 
 from raft import message_types
 from raft import node
+from .. import common
 
 
 def verify_arguments(amount):
     if len(sys.argv) != amount:
         raise Exception('Incorrect amount of arguments')
-
-
-def get_address_tuple(address):
-    split = address.split(':')
-    return (split[0], int(split[1]))
 
 
 def get(address):
@@ -58,6 +54,8 @@ fh = logging.FileHandler('client.log')
 sh = logging.StreamHandler(sys.stdout)
 logging.getLogger().addHandler(fh)
 logging.getLogger().addHandler(sh)
+setup_logging()
+
 
 if len(sys.argv) < 3:
     logging.error('Incorrect amount of arguments')

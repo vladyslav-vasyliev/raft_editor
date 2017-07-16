@@ -1,4 +1,4 @@
-<html>
+﻿<html>
 <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,6 +12,7 @@
     <div class="row">
         <form class="col-lg-12 col-md-12">
             <div class="form-group">
+                <label for="data">Data:</label>
                 <textarea id="data" class="form-control" rows="5">{{content}}</textarea>
             </div>
             <button type="button" onclick="readData()" class="btn">Update</button>
@@ -24,17 +25,19 @@
 <script src="/static/scripts/respond.js"></script>
 <script>
     function readData() {
-        $.get('/read_data', function(data) {
-            $('#data').val(data);
-        });
+        $.get('/read_data',
+            function(data) {
+                $('#data').val(data);
+            });
     }
+
     function writeData() {
         var textareaData = $('#data').val();
         $.ajax({
             type: 'POST',
             url: '/write_data',
-            data: textareaData,
-            success: function () { readData(); }
+            data: { 'textareaData': textareaData },
+            success: function() { readData(); }
         });
     }
 </script>

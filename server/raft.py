@@ -49,15 +49,15 @@ class simple_socket(object):
         sock.sendto(data, server_address)
 
 
-class message_types(Enum):
-    VOTE_REQUEST = 1
-    VOTE_REPLY = 2
+class message_types(object):
+    VOTE_REQUEST = 'VOTE_REQUEST'
+    VOTE_REPLY = 'VOTE_REPLY'
     
-    HEARTBEAT = 3
-    HEARTBEAT_RESPONSE = 4
+    HEARTBEAT = 'HEARTBEAT'
+    HEARTBEAT_RESPONSE = 'HEARTBEAT_RESPONSE'
 
-    SET = 5
-    GET = 6
+    SET = 'SET'
+    GET = 'GET'
 
 
 class data_states(Enum):
@@ -217,7 +217,7 @@ class node(simple_socket):
         self.leader = (hb_id, hb_address)
         if hb_data is not None and self.__data != hb_data:
             self.__data = hb_data
-            logging.info('{0} Accepted new data'.format(self.id))
+            logging.info('{0} Accepted new data {1}'.format(self.id, hb_data))
         msg_data = self.__compose_message(message_types.HEARTBEAT_RESPONSE, hb_data)
         self.send(self.__peers[hb_id], msg_data)
         self.__reset_election_timer()

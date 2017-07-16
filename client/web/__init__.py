@@ -5,4 +5,4 @@ The flask application package.
 from flask import Flask
 app = Flask(__name__)
 
-import RaftViewer.views
+import web.views
