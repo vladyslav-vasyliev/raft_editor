@@ -5,7 +5,11 @@ from common import read_nodes, setup_logging
 from raft import node
 
 
-node_list = read_nodes('../nodes.txt')
+if len(sys.argv) != 2:
+    raise Exception('Incorrect amount of arguments')
+    
+file_name = sys.argv[1]
+node_list = read_nodes(file_name)
 setup_logging('common.log')
 
 for i in range(len(node_list)):

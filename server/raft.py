@@ -5,8 +5,10 @@ import socket
 import sys
 import time
 import threading
-from enum import Enum
 import uuid
+from common import data_states
+from common import message_types
+from enum import Enum
 
 
 class simple_socket(object):
@@ -47,22 +49,6 @@ class simple_socket(object):
     def send_to_sock(self, sock, server_address, data):
         size = sys.getsizeof(data)
         sock.sendto(data, server_address)
-
-
-class message_types(object):
-    VOTE_REQUEST = 'VOTE_REQUEST'
-    VOTE_REPLY = 'VOTE_REPLY'
-    
-    HEARTBEAT = 'HEARTBEAT'
-    HEARTBEAT_RESPONSE = 'HEARTBEAT_RESPONSE'
-
-    SET = 'SET'
-    GET = 'GET'
-
-
-class data_states(Enum):
-    CONSISTENT = 0
-    INCONSISTENT = 1
 
 
 class node_states(Enum):

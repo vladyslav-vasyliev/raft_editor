@@ -13,6 +13,11 @@ class message_types(object):
     SET = 'SET'
     GET = 'GET'
     
+    
+class data_states(object):
+    CONSISTENT = 'CONSISTENT'
+    INCONSISTENT = 'INCONSISTENT'
+    
 
 def setup_logging(file_name):
     logging.basicConfig(format='%(message)s', level=logging.INFO)

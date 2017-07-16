@@ -14,10 +14,11 @@ import pickle
 @app.route('/')
 def home():
     """Renders the home page."""
+    data = read_data()
     return render_template(
         'index.html',
         title='Raft editor',
-        content='dd'
+        content=data
     )
 
 @app.route('/read_data', methods=['GET'])
@@ -35,7 +36,12 @@ def read_data():
             if i >= len(nodes):
                 value = e
                 break
-    return str(pickle.loads(value))
+    data = ''
+    if value is not None:
+        msg = pickle.loads(value)
+        if msg is not None and msg[1] is not None:
+            data = pickle.loads(msg[1])
+    return data
 
 @app.route('/write_data', methods=['POST'])
 def write_data():
