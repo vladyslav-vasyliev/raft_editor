@@ -1,0 +1,1 @@
+python ../RaftEditor/start_node.py 0 nodes.txt

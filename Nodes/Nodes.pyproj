@@ -4,14 +4,19 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>18ee2ff2-ab77-4f9e-b9a9-1a1b3d73b28e</ProjectGuid>
-    <ProjectHome>.</ProjectHome>
-    <StartupFile>PaxosEditor.py</StartupFile>
+    <ProjectHome>
+    </ProjectHome>
+    <StartupFile>tmp.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
-    <Name>PaxosEditor</Name>
+    <Name>Nodes</Name>
     <RootNamespace>PaxosEditor</RootNamespace>
+    <LaunchProvider>Standard Python launcher</LaunchProvider>
+    <CommandLineArguments>
+    </CommandLineArguments>
+    <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>
@@ -22,7 +27,20 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="PaxosEditor.py" />
+    <Compile Include="start_node.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="tmp.py" />
+    <Compile Include="raft.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="com.py">
+      <SubType>Code</SubType>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="nodes.txt" />
+    <Content Include="requirements.txt" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
