@@ -66,7 +66,6 @@ class node(simple_socket):
     leader = None
 
     __data = None
-    __data_to_set = None
 
     __term = 0
     __votes = 0
@@ -89,8 +88,7 @@ class node(simple_socket):
         for item in peers:
             self.__peers[item[0]] = item[1]
 
-        self.__election_timer = threading.Timer(self.__get_election_timeout(), self.__become_candidate)
-        self.__election_timer.start()
+        self.__reset_election_timer()
 
 
     # MESSAGE FORMAT (message_type, id, address, data)
@@ -123,12 +121,11 @@ class node(simple_socket):
 
 
     def set(self, data):
-        logging.info('{0} Trying to set value...'.format(self.id))
+        logging.info('{0} Trying to set value {1}'.format(self.id, data))
         if self.__data_state == data_states.INCONSISTENT:
             logging.info('{0} Current state is inconsistent'.format(self.id))
         elif self.state == node_states.LEADER:
             self.__data = data
-            self.__data_to_set = data
             self.__data_state = data_states.INCONSISTENT
             logging.info('{0} Value was updated'.format(self.id))
         elif self.leader is not None:
@@ -147,6 +144,7 @@ class node(simple_socket):
         else:
             msg_data = self.__compose_message(message_types.GET, client_address)
             self.send(self.leader[1], msg_data)
+            logging.info('{0} Redirecting request to {1}'.format(self.id, self.leader[0]))
 
 
     # ---------- LEADER ELECTION ----------
@@ -155,18 +153,18 @@ class node(simple_socket):
         self.__votes = 1
         self.__term += 1
         self.state = node_states.CANDIDATE
+        logging.info('{0} Became CANDIDATE'.format(self.id))
         msg_data = self.__compose_message(message_types.VOTE_REQUEST, self.__term)
         self.__send_to_peers(msg_data)
         self.__reset_election_timer()
-        logging.info('{0} Became CANDIDATE'.format(self.id))
 
 
     def __vote(self, candidate_id, candidate_address, candidate_term):
+        self.__reset_election_timer()
         if self.__term < candidate_term:
             self.__term = candidate_term
             msg_data = self.__compose_message(message_types.VOTE_REPLY)
             self.send(self.__peers[candidate_id], msg_data)
-            self.__reset_election_timer()
             logging.info('{0} Voted for {1} in term {2}'.format(self.id, candidate_id, candidate_term))
         
 
@@ -175,8 +173,9 @@ class node(simple_socket):
         logging.info('{0} Current vote count is {1}'.format(self.id, self.__votes))
         if self.__votes >= int(len(self.__peers) / 2 + 1) and self.state != node_states.LEADER:
             self.state = node_states.LEADER
-            self.__heartbeat()
             logging.info('{0} Became LEADER'.format(self.id))
+            self.__heartbeat()
+            self.__cancel_election_timer()
 
 
     def __compose_message(self, type, data=None):
@@ -186,10 +185,10 @@ class node(simple_socket):
     # ---------- HEARTBEAT ----------
 
     def __heartbeat(self):
-        msg = self.__compose_message(message_types.HEARTBEAT, self.__data_to_set)
-        self.__send_to_peers(msg)
         self.__set_heartbeat_timer()
-        # logging.info('{0} Heartbeat'.format(self.id))
+        self.state = node_states.LEADER
+        msg = self.__compose_message(message_types.HEARTBEAT, self.__data)
+        self.__send_to_peers(msg)
 
         
     def __set_heartbeat_timer(self):
@@ -198,12 +197,14 @@ class node(simple_socket):
 
 
     def __respond_to_heartbeat(self, hb_id, hb_address, hb_data):
-        self.__reset_election_timer()
-        time.sleep(self.HEARTBEAT_TIMEOUT)
+        if self.state == node_states.LEADER:
+            return
+        self.__cancel_election_timer()
+        self.state = node_states.FOLLOWER
         self.leader = (hb_id, hb_address)
-        if hb_data is not None and self.__data != hb_data:
+        if hb_data is not None:
             self.__data = hb_data
-            logging.info('{0} Accepted new data {1}'.format(self.id, hb_data))
+            logging.info('{0} Accepted new data {1}'.format(self.id, self.__data))
         msg_data = self.__compose_message(message_types.HEARTBEAT_RESPONSE, hb_data)
         self.send(self.__peers[hb_id], msg_data)
         self.__reset_election_timer()
@@ -213,16 +214,20 @@ class node(simple_socket):
     __data_state = data_states.CONSISTENT
 
     def __process_heartbeat_response(self, hb_id, hb_address, hb_data):
-        if hb_data is not None and hb_data == self.__data_to_set:
+        if hb_data is not None and hb_data == self.__data:
             self.__updated_instances += 1
         if self.__updated_instances > len(self.__peers) / 2 + 1:
             self.__data_state = data_states.CONSISTENT
-        if self.__updated_instances == len(self.__peers):
-            self.__data_to_set = None
 
 
     def __get_election_timeout(self):
-        return random.uniform(0.15, 0.3)
+        return random.uniform(self.HEARTBEAT_TIMEOUT * 1.5, self.HEARTBEAT_TIMEOUT * 1.3)
+
+  
+    def __cancel_election_timer(self):
+        if self.__election_timer is not None:
+            self.__election_timer.cancel()
+            self.__election_timer = None
 
 
     def __reset_election_timer(self):
