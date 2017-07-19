@@ -37,7 +37,9 @@
             type: 'POST',
             url: '/write_data',
             data: { 'textareaData': textareaData },
-            success: function() { readData(); }
+            success: function() {
+                settimeout(readData, 0.5);
+            }
         });
     }
 </script>

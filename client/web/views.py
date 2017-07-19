@@ -21,6 +21,7 @@ def home():
         content=data
     )
 
+
 @app.route('/read_data', methods=['GET'])
 def read_data():
     nodes = get_node_list()
@@ -43,6 +44,7 @@ def read_data():
         if msg is not None and msg[1] is not None:
             data = pickle.loads(msg[1])
     return data
+
 
 @app.route('/write_data', methods=['POST'])
 def write_data():

@@ -2,6 +2,7 @@
 This script runs the RaftViewer application using a development server.
 """
 import sys
+
 sys.path += ['..']
 
 from os import environ

@@ -3,21 +3,24 @@ import logging
 import pickle
 import socket
 
-class message_types(object):
+
+class MessageTypes(object):
     VOTE_REQUEST = 'VOTE_REQUEST'
     VOTE_REPLY = 'VOTE_REPLY'
-    
+
     HEARTBEAT = 'HEARTBEAT'
     HEARTBEAT_RESPONSE = 'HEARTBEAT_RESPONSE'
 
     SET = 'SET'
     GET = 'GET'
-    
-    
-class data_states(object):
+
+    COMMIT = 'COMMIT'
+
+
+class DataStates(object):
     CONSISTENT = 'CONSISTENT'
     INCONSISTENT = 'INCONSISTENT'
-    
+
 
 def setup_logging(file_name):
     logging.basicConfig(format='%(message)s', level=logging.INFO)
@@ -45,7 +48,7 @@ def get(address):
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     try:
         sock.settimeout(1)
-        msg_data = pickle.dumps( (message_types.GET, None, None, None) )
+        msg_data = pickle.dumps((MessageTypes.GET, None, None, None))
         sock.sendto(msg_data, address)
         recieved_data = sock.recv(1024)
         return recieved_data
@@ -60,7 +63,7 @@ def set(address, value):
     try:
         sock.settimeout(1)
         data = pickle.dumps(value)
-        msg_data = pickle.dumps( (message_types.SET, None, None, data) )
+        msg_data = pickle.dumps((MessageTypes.SET, None, None, data))
         sock.sendto(msg_data, address)
     except socket.timeout:
         logging.error('Timeout was reached')
