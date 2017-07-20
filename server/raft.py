@@ -80,6 +80,7 @@ class Node(SimpleSocket):
         self.__votes = 0
         self.__term = 0
         self.__has_voted = False
+        self.__data_state = DataStates.CONSISTENT
         for item in peers:
             self.__peers[item[0]] = item[1]
 
@@ -116,12 +117,13 @@ class Node(SimpleSocket):
 
     def set(self, data):
         logging.info('{0} Trying to set value {1}'.format(self.id, data))
-        if self.__data_state == DataStates.INCONSISTENT:
-            logging.info('{0} Current state is inconsistent'.format(self.id))
-        elif self.state == NodeStates.LEADER:
-            self.__data_to_set = data
-            self.__data_state = DataStates.INCONSISTENT
-            logging.info('{0} Value was updated'.format(self.id))
+        if self.state == NodeStates.LEADER:
+            if self.__data_state == DataStates.INCONSISTENT:
+                logging.info('{0} Current state is inconsistent'.format(self.id))
+            else:
+                self.__data_to_set = data
+                self.__data_state = DataStates.INCONSISTENT
+                logging.info('{0} Value was updated'.format(self.id))
         elif self.leader is not None:
             msg_data = self.__compose_message(MessageTypes.SET, data)
             self.send(self.leader[1], msg_data)
@@ -171,6 +173,7 @@ class Node(SimpleSocket):
 
     def __heartbeat(self):
         self.__set_heartbeat_timer()
+        self.__updated_instances = 0
         self.state = NodeStates.LEADER
         msg = self.__compose_message(MessageTypes.HEARTBEAT, self.__data_to_set)
         self.__send_to_peers(msg)
@@ -196,8 +199,10 @@ class Node(SimpleSocket):
     __data_state = DataStates.CONSISTENT
 
     def __process_heartbeat_response(self, hb_id, hb_address, hb_data):
+        if self.state is not NodeStates.LEADER:
+            return
         self.__updated_instances += 1
-        if self.__updated_instances > len(self.__peers) / 2 + 1:
+        if self.__updated_instances >= int(len(self.__peers) / 2):
             if self.__data_state == DataStates.INCONSISTENT:
                 self.__data = self.__data_to_set
                 self.__send_to_peers(self.__compose_message(MessageTypes.COMMIT))
@@ -206,6 +211,7 @@ class Node(SimpleSocket):
     def __commit(self):
         self.__data = self.__data_to_set
         self.__data_to_set = None
+        self.__data_state == DataStates.CONSISTENT
         logging.info('{0} Committed data changes {1}'.format(self.id, self.__data))
 
     # ---------- HELPERS ----------

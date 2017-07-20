@@ -36,7 +36,6 @@ def read_data():
             i += 1
             if i >= len(nodes):
                 value = e
-                has_read = True
                 break
     data = ''
     if value is not None:
@@ -61,6 +60,5 @@ def write_data():
             i += 1
             if i >= len(nodes):
                 value = e
-                has_read = True
                 break
     return str(value)
